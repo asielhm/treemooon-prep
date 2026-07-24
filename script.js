@@ -1,209 +1,950 @@
-// ===============================
-// TREEMOOON LLC
-// script.js
-// ===============================
+/* =========================================================
+   TREEMOOON LLC
+   Professional Prep Center Website
+   script.js
+========================================================= */
 
-// ===============================
-// Sticky Header
-// ===============================
+"use strict";
 
-const header = document.querySelector("header");
 
-window.addEventListener("scroll", () => {
+/* =========================================================
+   1. BUSINESS INFORMATION
 
-    if(window.scrollY > 60){
+   Replace this email with the real business email.
+========================================================= */
 
-        header.style.background = "#ffffff";
-        header.style.boxShadow = "0 3px 12px rgba(0,0,0,.15)";
+const BUSINESS_EMAIL = "Treemoon20@gmail.com";
 
-    }else{
 
-        header.style.background = "#ffffff";
-        header.style.boxShadow = "0 2px 8px rgba(0,0,0,.08)";
+/* =========================================================
+   2. ELEMENTS
+========================================================= */
+
+const body = document.body;
+
+const header = document.getElementById("site-header");
+
+const mobileMenuButton = document.getElementById(
+    "mobile-menu-button"
+);
+
+const mainNavigation = document.getElementById(
+    "main-navigation"
+);
+
+const navigationLinks = document.querySelectorAll(
+    ".nav-link"
+);
+
+const backToTopButton = document.getElementById(
+    "back-to-top"
+);
+
+const quoteForm = document.getElementById(
+    "quote-form"
+);
+
+const formMessage = document.getElementById(
+    "form-message"
+);
+
+const currentYearElement = document.getElementById(
+    "current-year"
+);
+
+
+/* =========================================================
+   3. CURRENT YEAR
+========================================================= */
+
+function updateCurrentYear() {
+
+    if (!currentYearElement) {
+        return;
+    }
+
+    currentYearElement.textContent =
+        new Date().getFullYear();
+
+}
+
+updateCurrentYear();
+
+
+/* =========================================================
+   4. HEADER SCROLL EFFECT
+========================================================= */
+
+function updateHeaderOnScroll() {
+
+    if (!header) {
+        return;
+    }
+
+    if (window.scrollY > 20) {
+
+        header.classList.add("scrolled");
+
+    } else {
+
+        header.classList.remove("scrolled");
+
+    }
+
+}
+
+window.addEventListener(
+    "scroll",
+    updateHeaderOnScroll,
+    { passive: true }
+);
+
+updateHeaderOnScroll();
+
+
+/* =========================================================
+   5. MOBILE NAVIGATION
+========================================================= */
+
+function openMobileMenu() {
+
+    if (!mobileMenuButton || !mainNavigation) {
+        return;
+    }
+
+    mobileMenuButton.classList.add("is-open");
+    mainNavigation.classList.add("is-open");
+
+    mobileMenuButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+    mobileMenuButton.setAttribute(
+        "aria-label",
+        "Close navigation menu"
+    );
+
+    body.classList.add("menu-open");
+
+}
+
+
+function closeMobileMenu() {
+
+    if (!mobileMenuButton || !mainNavigation) {
+        return;
+    }
+
+    mobileMenuButton.classList.remove("is-open");
+    mainNavigation.classList.remove("is-open");
+
+    mobileMenuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    mobileMenuButton.setAttribute(
+        "aria-label",
+        "Open navigation menu"
+    );
+
+    body.classList.remove("menu-open");
+
+}
+
+
+function toggleMobileMenu() {
+
+    if (!mainNavigation) {
+        return;
+    }
+
+    const isOpen =
+        mainNavigation.classList.contains("is-open");
+
+    if (isOpen) {
+
+        closeMobileMenu();
+
+    } else {
+
+        openMobileMenu();
+
+    }
+
+}
+
+
+if (mobileMenuButton) {
+
+    mobileMenuButton.addEventListener(
+        "click",
+        toggleMobileMenu
+    );
+
+}
+
+
+navigationLinks.forEach((link) => {
+
+    link.addEventListener("click", () => {
+
+        closeMobileMenu();
+
+    });
+
+});
+
+
+document.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+
+        closeMobileMenu();
 
     }
 
 });
 
 
-// ===============================
-// Active Navigation Link
-// ===============================
+document.addEventListener("click", (event) => {
 
-const sections = document.querySelectorAll("section");
-const navLinks = document.querySelectorAll("nav ul li a");
+    if (!mainNavigation || !mobileMenuButton) {
+        return;
+    }
 
-window.addEventListener("scroll", () => {
+    const menuIsOpen =
+        mainNavigation.classList.contains("is-open");
 
-    let current = "";
+    if (!menuIsOpen) {
+        return;
+    }
 
-    sections.forEach(section => {
+    const clickedInsideMenu =
+        mainNavigation.contains(event.target);
 
-        const sectionTop = section.offsetTop - 120;
+    const clickedMenuButton =
+        mobileMenuButton.contains(event.target);
 
-        if(window.pageYOffset >= sectionTop){
+    if (!clickedInsideMenu && !clickedMenuButton) {
 
-            current = section.getAttribute("id");
+        closeMobileMenu();
+
+    }
+
+});
+
+
+window.addEventListener("resize", () => {
+
+    if (window.innerWidth > 980) {
+
+        closeMobileMenu();
+
+    }
+
+});
+
+
+/* =========================================================
+   6. ACTIVE NAVIGATION LINK
+========================================================= */
+
+const pageSections =
+    document.querySelectorAll("main section[id]");
+
+
+function updateActiveNavigation() {
+
+    let currentSectionId = "";
+
+    const scrollPosition =
+        window.scrollY + 180;
+
+    pageSections.forEach((section) => {
+
+        const sectionTop =
+            section.offsetTop;
+
+        const sectionHeight =
+            section.offsetHeight;
+
+        if (
+            scrollPosition >= sectionTop &&
+            scrollPosition <
+                sectionTop + sectionHeight
+        ) {
+
+            currentSectionId =
+                section.getAttribute("id");
 
         }
 
     });
 
-    navLinks.forEach(link => {
+
+    navigationLinks.forEach((link) => {
 
         link.classList.remove("active");
 
-        if(link.getAttribute("href") === "#" + current){
+        link.removeAttribute("aria-current");
+
+        const linkDestination =
+            link.getAttribute("href");
+
+        if (
+            linkDestination ===
+            `#${currentSectionId}`
+        ) {
 
             link.classList.add("active");
 
-        }
-
-    });
-
-});
-
-
-// ===============================
-// Quote Form Validation
-// ===============================
-
-const form = document.querySelector("form");
-
-form.addEventListener("submit", function(e){
-
-    e.preventDefault();
-
-    const name = form.querySelector('input[type="text"]');
-    const email = form.querySelector('input[type="email"]');
-
-    if(name.value.trim() === ""){
-
-        alert("Please enter your name.");
-        return;
-
-    }
-
-    if(email.value.trim() === ""){
-
-        alert("Please enter your email.");
-        return;
-
-    }
-
-    alert("Thank you! Your quote request has been received. We will contact you shortly.");
-
-    form.reset();
-
-});
-
-
-// ===============================
-// Fade In Animation
-// ===============================
-
-const observer = new IntersectionObserver(entries => {
-
-    entries.forEach(entry => {
-
-        if(entry.isIntersecting){
-
-            entry.target.classList.add("show");
+            link.setAttribute(
+                "aria-current",
+                "page"
+            );
 
         }
 
     });
 
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateActiveNavigation,
+    { passive: true }
+);
+
+updateActiveNavigation();
+
+
+/* =========================================================
+   7. SMOOTH SCROLL FOR INTERNAL LINKS
+========================================================= */
+
+const internalLinks =
+    document.querySelectorAll('a[href^="#"]');
+
+
+internalLinks.forEach((link) => {
+
+    link.addEventListener("click", (event) => {
+
+        const targetId =
+            link.getAttribute("href");
+
+        if (
+            !targetId ||
+            targetId === "#"
+        ) {
+            return;
+        }
+
+        const destination =
+            document.querySelector(targetId);
+
+        if (!destination) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const headerHeight =
+            header
+                ? header.offsetHeight
+                : 0;
+
+        const destinationPosition =
+            destination.getBoundingClientRect().top +
+            window.scrollY -
+            headerHeight -
+            15;
+
+        window.scrollTo({
+            top: destinationPosition,
+            behavior: "smooth"
+        });
+
+        closeMobileMenu();
+
+    });
+
 });
 
-document.querySelectorAll("section").forEach(section => {
 
-    section.classList.add("hidden");
+/* =========================================================
+   8. BACK TO TOP BUTTON
+========================================================= */
 
-    observer.observe(section);
+function updateBackToTopButton() {
 
-});
+    if (!backToTopButton) {
+        return;
+    }
 
+    if (window.scrollY > 600) {
 
-// ===============================
-// Back To Top Button
-// ===============================
+        backToTopButton.classList.add(
+            "visible"
+        );
 
-const topButton = document.createElement("button");
+    } else {
 
-topButton.innerHTML = "↑";
-
-topButton.id = "topButton";
-
-document.body.appendChild(topButton);
-
-topButton.style.position = "fixed";
-topButton.style.bottom = "30px";
-topButton.style.right = "30px";
-topButton.style.width = "50px";
-topButton.style.height = "50px";
-topButton.style.borderRadius = "50%";
-topButton.style.fontSize = "22px";
-topButton.style.display = "none";
-topButton.style.cursor = "pointer";
-topButton.style.background = "#0056b3";
-topButton.style.color = "white";
-topButton.style.border = "none";
-topButton.style.boxShadow = "0 4px 10px rgba(0,0,0,.2)";
-topButton.style.zIndex = "999";
-
-window.addEventListener("scroll", () => {
-
-    if(window.scrollY > 500){
-
-        topButton.style.display = "block";
-
-    }else{
-
-        topButton.style.display = "none";
+        backToTopButton.classList.remove(
+            "visible"
+        );
 
     }
 
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateBackToTopButton,
+    { passive: true }
+);
+
+
+if (backToTopButton) {
+
+    backToTopButton.addEventListener(
+        "click",
+        () => {
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+}
+
+updateBackToTopButton();
+
+
+/* =========================================================
+   9. SCROLL REVEAL ANIMATIONS
+========================================================= */
+
+const revealElements =
+    document.querySelectorAll(
+        [
+            ".section-heading",
+            ".about-images",
+            ".about-content",
+            ".service-card",
+            ".process-step",
+            ".gallery-item",
+            ".pricing-category",
+            ".inclusive-plan",
+            ".advantage",
+            ".advantages-image",
+            ".quote-information",
+            ".quote-form-container",
+            ".faq-introduction",
+            ".faq-item",
+            ".contact-card"
+        ].join(",")
+    );
+
+
+revealElements.forEach((element) => {
+
+    element.classList.add("reveal");
+
 });
 
-topButton.addEventListener("click", () => {
 
-    window.scrollTo({
+if ("IntersectionObserver" in window) {
 
-        top:0,
-        behavior:"smooth"
+    const revealObserver =
+        new IntersectionObserver(
+
+            (entries, observer) => {
+
+                entries.forEach((entry) => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add(
+                            "visible"
+                        );
+
+                        observer.unobserve(
+                            entry.target
+                        );
+
+                    }
+
+                });
+
+            },
+
+            {
+                threshold: 0.12,
+                rootMargin:
+                    "0px 0px -40px 0px"
+            }
+
+        );
+
+
+    revealElements.forEach((element) => {
+
+        revealObserver.observe(element);
+
+    });
+
+} else {
+
+    revealElements.forEach((element) => {
+
+        element.classList.add("visible");
+
+    });
+
+}
+
+
+/* =========================================================
+   10. FAQ ACCORDION
+
+   Only one FAQ item remains open at a time.
+========================================================= */
+
+const faqItems =
+    document.querySelectorAll(".faq-item");
+
+
+faqItems.forEach((faqItem) => {
+
+    faqItem.addEventListener(
+        "toggle",
+        () => {
+
+            if (!faqItem.open) {
+                return;
+            }
+
+            faqItems.forEach((otherItem) => {
+
+                if (otherItem !== faqItem) {
+
+                    otherItem.open = false;
+
+                }
+
+            });
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   11. FORM MESSAGE
+========================================================= */
+
+function displayFormMessage(
+    message,
+    type
+) {
+
+    if (!formMessage) {
+        return;
+    }
+
+    formMessage.textContent = message;
+
+    formMessage.classList.remove(
+        "success",
+        "error"
+    );
+
+    formMessage.classList.add(type);
+
+    formMessage.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
+
+
+function clearFormMessage() {
+
+    if (!formMessage) {
+        return;
+    }
+
+    formMessage.textContent = "";
+
+    formMessage.classList.remove(
+        "success",
+        "error"
+    );
+
+}
+
+
+/* =========================================================
+   12. QUOTE FORM
+========================================================= */
+
+function getSelectedServices() {
+
+    if (!quoteForm) {
+        return [];
+    }
+
+    const selectedServices =
+        quoteForm.querySelectorAll(
+            'input[name="services"]:checked'
+        );
+
+    return Array.from(selectedServices)
+        .map((checkbox) => checkbox.value);
+
+}
+
+
+function getSelectedShipmentType() {
+
+    if (!quoteForm) {
+        return "";
+    }
+
+    const selectedShipment =
+        quoteForm.querySelector(
+            'input[name="shipmentArrival"]:checked'
+        );
+
+    return selectedShipment
+        ? selectedShipment.value
+        : "";
+
+}
+
+
+function sanitizeFormValue(value) {
+
+    if (typeof value !== "string") {
+        return "";
+    }
+
+    return value.trim();
+
+}
+
+
+function buildEmailBody(formData) {
+
+    const services =
+        formData.services.length > 0
+            ? formData.services.join(", ")
+            : "No services selected";
+
+    return [
+        "NEW QUOTE REQUEST - TREEMOOON LLC",
+        "",
+        "CONTACT INFORMATION",
+        `Full name: ${formData.fullName}`,
+        `Company: ${formData.company || "Not provided"}`,
+        `Email: ${formData.email}`,
+        `Telephone / WhatsApp: ${formData.phone}`,
+        "",
+        "BUSINESS INFORMATION",
+        `Business type: ${formData.businessType}`,
+        `Estimated monthly volume: ${formData.monthlyVolume}`,
+        `Shipment arrival: ${formData.shipmentArrival}`,
+        "",
+        "SERVICES REQUIRED",
+        services,
+        "",
+        "ADDITIONAL INFORMATION",
+        formData.additionalInformation ||
+            "No additional information provided.",
+        "",
+        "This request was prepared through the Treemooon LLC website."
+    ].join("\n");
+
+}
+
+
+function submitQuoteForm(event) {
+
+    event.preventDefault();
+
+    clearFormMessage();
+
+
+    if (!quoteForm) {
+        return;
+    }
+
+
+    /*
+       Browser validation for required fields,
+       email format and required selections.
+    */
+
+    if (!quoteForm.checkValidity()) {
+
+        displayFormMessage(
+            "Please complete all required fields before submitting your request.",
+            "error"
+        );
+
+        quoteForm.reportValidity();
+
+        return;
+
+    }
+
+
+    const selectedServices =
+        getSelectedServices();
+
+
+    if (selectedServices.length === 0) {
+
+        displayFormMessage(
+            "Please select at least one service.",
+            "error"
+        );
+
+        const servicesSection =
+            quoteForm.querySelector(
+                ".service-checkbox-grid"
+            );
+
+        if (servicesSection) {
+
+            servicesSection.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        }
+
+        return;
+
+    }
+
+
+    const formData = {
+
+        fullName: sanitizeFormValue(
+            quoteForm.elements.fullName.value
+        ),
+
+        company: sanitizeFormValue(
+            quoteForm.elements.company.value
+        ),
+
+        email: sanitizeFormValue(
+            quoteForm.elements.email.value
+        ),
+
+        phone: sanitizeFormValue(
+            quoteForm.elements.phone.value
+        ),
+
+        businessType: sanitizeFormValue(
+            quoteForm.elements.businessType.value
+        ),
+
+        monthlyVolume: sanitizeFormValue(
+            quoteForm.elements.monthlyVolume.value
+        ),
+
+        shipmentArrival:
+            getSelectedShipmentType(),
+
+        services: selectedServices,
+
+        additionalInformation:
+            sanitizeFormValue(
+                quoteForm.elements
+                    .additionalInformation
+                    .value
+            )
+
+    };
+
+
+    const submitButton =
+        quoteForm.querySelector(
+            'button[type="submit"]'
+        );
+
+    const originalButtonContent =
+        submitButton
+            ? submitButton.innerHTML
+            : "";
+
+
+    if (submitButton) {
+
+        submitButton.disabled = true;
+
+        submitButton.innerHTML = `
+            <span>Preparing Request...</span>
+            <i class="fa-solid fa-spinner fa-spin"
+               aria-hidden="true"></i>
+        `;
+
+    }
+
+
+    const emailSubject =
+        `Quote Request - ${formData.fullName}`;
+
+
+    const emailBody =
+        buildEmailBody(formData);
+
+
+    const mailtoLink =
+        `mailto:${BUSINESS_EMAIL}` +
+        `?subject=${encodeURIComponent(emailSubject)}` +
+        `&body=${encodeURIComponent(emailBody)}`;
+
+
+    window.setTimeout(() => {
+
+        displayFormMessage(
+            "Your email application will open with the quotation information prepared. Review the message and press Send.",
+            "success"
+        );
+
+
+        window.location.href = mailtoLink;
+
+
+        if (submitButton) {
+
+            submitButton.disabled = false;
+
+            submitButton.innerHTML =
+                originalButtonContent;
+
+        }
+
+    }, 500);
+
+}
+
+
+if (quoteForm) {
+
+    quoteForm.addEventListener(
+        "submit",
+        submitQuoteForm
+    );
+
+
+    quoteForm.addEventListener(
+        "input",
+        () => {
+
+            if (
+                formMessage &&
+                formMessage.classList.contains(
+                    "error"
+                )
+            ) {
+
+                clearFormMessage();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   13. IMAGE ERROR HANDLING
+========================================================= */
+
+const websiteImages =
+    document.querySelectorAll("img");
+
+
+websiteImages.forEach((image) => {
+
+    image.addEventListener("error", () => {
+
+        console.warn(
+            `Image could not be loaded: ${image.src}`
+        );
+
+        image.classList.add(
+            "image-load-error"
+        );
 
     });
 
 });
 
 
-// ===============================
-// Smooth Hover Effect on Cards
-// ===============================
+/* =========================================================
+   14. EXTERNAL LINKS SECURITY
+========================================================= */
 
-const cards = document.querySelectorAll(".card");
+const externalLinks =
+    document.querySelectorAll(
+        'a[target="_blank"]'
+    );
 
-cards.forEach(card=>{
 
-    card.addEventListener("mouseenter",()=>{
+externalLinks.forEach((link) => {
 
-        card.style.transform="translateY(-12px)";
-        card.style.transition=".3s";
+    const currentRel =
+        link.getAttribute("rel") || "";
 
-    });
+    const relValues =
+        new Set(
+            currentRel
+                .split(" ")
+                .filter(Boolean)
+        );
 
-    card.addEventListener("mouseleave",()=>{
+    relValues.add("noopener");
+    relValues.add("noreferrer");
 
-        card.style.transform="translateY(0px)";
-
-    });
+    link.setAttribute(
+        "rel",
+        Array.from(relValues).join(" ")
+    );
 
 });
 
 
-// ===============================
-// Console Welcome
-// ===============================
+/* =========================================================
+   15. PAGE LOADED
+========================================================= */
 
-console.log("Treemooon LLC Website Loaded Successfully.");
+window.addEventListener("load", () => {
+
+    body.classList.add("page-loaded");
+
+    updateHeaderOnScroll();
+    updateActiveNavigation();
+    updateBackToTopButton();
+
+});
+
+
+console.log(
+    "Treemooon LLC website loaded successfully."
+);
